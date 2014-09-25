@@ -1,59 +1,23 @@
 //Nick Zheng
-//Assignment #2 - PONG!
+//Assignment 2 - Pong
 
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
+#include "Entity.h"
 
 SDL_Window* displayWindow;
-		
-void drawSprite(GLint texture, float x, float y, float rotation){
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glMatrixMode(GL_MODELVIEW);
+Entity* ball;
+Entity* paddleRed;
+Entity* paddleBlu;
+Entity* medal;
+Entity* blockTop; 
+Entity* blockBot;
 
-	glLoadIdentity();
-	glTranslatef(x, y, 0.0);
-	glRotatef(rotation, 0.0, 0.0, 1.0);
+float lastFrameTicks;
 
-	GLfloat quad[] = {-0.1f, 0.1f, -0.1f, -0.1f, 0.1f, -0.1f, 0.1f, 0.1f};
-	glVertexPointer(2, GL_FLOAT, 0, quad);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	GLfloat quadUVs[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0};
-	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_QUADS, 0, 4);
-	glDisable(GL_TEXTURE_2D);
-}
-
-
-//borders
-void drawBlocks(GLint texture, float x, float y, float rotation){
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glMatrixMode(GL_MODELVIEW);
-
-	glLoadIdentity();
-	glTranslatef(x, y, 0.0);
-	glRotatef(rotation, 0.0, 0.0, 1.0);
-
-	GLfloat quad[] = {-3.0f, 0.1f, -3.0f, -0.1f, 3.0f, -0.1f, 3.0f, 0.1f};
-	glVertexPointer(2, GL_FLOAT, 0, quad);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	GLfloat quadUVs[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0};
-	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_QUADS, 0, 4);
-	glDisable(GL_TEXTURE_2D);
-}
+const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
 //Loads texture
 GLuint loadTexture(const char *image_path) {
@@ -69,118 +33,135 @@ GLuint loadTexture(const char *image_path) {
 	return textureID;
 }
 
-int main(int argc, char *argv[])
-{
-	//Setup
+//create entities and initialize
+void setUp(){
 	SDL_Init(SDL_INIT_VIDEO);
 	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
 
-	GLint ballGrey = loadTexture("ballGrey.png");
-	GLint paddleRed = loadTexture("paddleRed.png");
-	GLint paddleBlu = loadTexture("paddleBlu.png");
-	GLint blocks = loadTexture("element_grey_rectangle.png");
-
-	//initializing variables
-	float redPosX = 1.0;
-	float redPosY = 0.0;
-	float bluePosX = -1.0;
-	float bluePosY = 0.0;
-	float ballPosY = 0.0;
-	float ballPosX = 0.0;
-	int sign = 0;
-	
-	bool done = false;
-	
-	SDL_Event event;
-		
 	glViewport(0, 0, 800, 600);
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-1.33, 1.33, -1.0, 1.0, -1.0, 1.0);
 
-	glMatrixMode(GL_MODELVIEW);
+	GLuint greyBall = loadTexture("ballGrey.png");
+	GLuint redPaddle = loadTexture("paddleRed.png");
+	GLuint bluePaddle = loadTexture("paddleBlu.png");
+	GLuint greyMedal = loadTexture("shaded_medal8.png");
+	GLuint blocks = loadTexture("element_grey_rectangle.png");
 
-	const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	ball = new Entity(greyBall, 0.0f, 0.0f, 0.0f, 0.1f, 0.1f);
+	paddleRed = new Entity(redPaddle, 1.0f, 0.0f, 0.0f, 0.1f, 0.3f);
+	paddleBlu = new Entity(bluePaddle, -1.0f, 0.0f, 0.0f, 0.1f, 0.3f);
+	blockTop = new Entity(blocks, 0.0f, 1.0f, 0.0f, 3.0f, 0.2f);
+	blockBot = new Entity(blocks, 0.0f, -1.0f, 0.0f, 3.0f, 0.2f);
+	medal = new Entity(greyMedal, 0.0f, 0.0f, 0.0f, 0.2f, 0.2f);
 
-	//Keyboard Up, down, W, and S
-	while (!done) {
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-				done = true;
-			}
-			if(keys[SDL_SCANCODE_UP] && redPosY < 0.8f){
-				redPosY += 0.1f;
-			}
-			else if(keys[SDL_SCANCODE_DOWN] && redPosY > -0.8){
-				redPosY -= 0.1f;
-			}	
-			if(keys[SDL_SCANCODE_W] && bluePosY < 0.8){
-				bluePosY += 0.1f;
-			}
-			else if(keys[SDL_SCANCODE_S] && bluePosY > -0.8){
-				bluePosY -= 0.1f;
-			}
+	ball->speed = 1.0f;
+	ball->xDirect = 1.0f;
+	ball->yDirect = 1.0f;
+}
 
+//space to start over
+bool processEvents(){
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+			return false;
 		}
+		else if(keys[SDL_SCANCODE_SPACE]){
+			ball->draw();
+			ball->x = 0.0f;
+			ball->y = 0.0f;
+		}
+	}
+	return true;
+}
+
+
+void update(){
 	
+	float ticks = (float)SDL_GetTicks() / 1000.0f;
+	float elapsed = ticks - lastFrameTicks;
+	lastFrameTicks = ticks;
 
-		glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+	ball->x += ball->speed*ball->xDirect*elapsed;
+	ball->y += ball->speed*ball->yDirect*elapsed;
 
-		float lastFrameTicks = 0.0f;
-		float ticks = (float)SDL_GetTicks()/1000.0f;
-		float elapsed = ticks - lastFrameTicks;
-		lastFrameTicks = ticks;
-
-		ballPosX = elapsed;
-
-		//The blue seems to go up and down much faster than the red, not sure why. 
-		//I checked the values and they seem fine.
-		drawSprite(ballGrey, ballPosX, ballPosY, 0.0);
-		drawSprite(paddleRed, redPosX, redPosY, 0.0);
-		drawSprite(paddleBlu, bluePosX, bluePosY, 0.0);
-		drawBlocks(blocks, 0.0, 1.0, 0.0);
-		drawBlocks(blocks, 0.0, -1.0, 0.0);
-
-		//check collision
-		//red paddle
-/*		if(!((ballPosX - 0.1)>(redPosX + 0.1)) && !((ballPosX + 0.1)<(redPosX - 0.1)) && !((ballPosY - 0.1)>(redPosY + 0.1)) && !((ballPosY + 0.1)<(redPosY -0.1))){
-			//reverse directions
-			ballPosX = -0.1f*elapsed;
-		}
-		else{
-			//reverse directions
-			ballPosX = elapsed;
-		}
-		//blue paddle
-		if(!((ballPosX - 0.1)>(bluePosY + 0.1)) && !((ballPosX + 0.1)<(bluePosX - 0.1)) && !((ballPosY - 0.1)>(bluePosY + 0.1)) && !((ballPosY + 0.1)<(redPosY - 0.1))){
-			//reverse directions
-			ballPosX = 0.1f*elapsed;
-		}
-		else{
-			//reverse directions
-			ballPosX = -0.1f*elapsed;
-		}
-		//borders
-		if(ballPosY >= 0.8 || ballPosY <= -0.8){
-			//reverse directions
-		}
-*/		
-		
-		//win conditions
-		if(ballPosX > 1.33){
-			GLint medal = loadTexture("shaded_medal8.png");
-			drawSprite(medal, -0.5, 0.5, 0.0);
-		}
-		else if(ballPosX < -1.33){
-			GLint medal = loadTexture("shaded_medal8.png");
-			drawSprite(medal, 0.5, 0.5, 0.0);
-		}
-
-		SDL_GL_SwapWindow(displayWindow);
+	if(keys[SDL_SCANCODE_UP] && paddleRed->y < 0.8f){
+		paddleRed->y += 2.0f*elapsed;
+	}
+	else if(keys[SDL_SCANCODE_DOWN] && paddleRed->y > -0.8){
+		paddleRed->y -= 2.0f*elapsed;
+	}	
+	if(keys[SDL_SCANCODE_W] && paddleBlu->y < 0.8){
+		paddleBlu->y += 2.0f*elapsed;
+	}
+	else if(keys[SDL_SCANCODE_S] && paddleBlu->y > -0.8){
+		paddleBlu->y -= 2.0f*elapsed;
+	}
+	
+	//wall collision
+	if(ball->y > 0.85f && ball->yDirect > 0.0f){
+		ball->yDirect = -ball->yDirect; 
+	}
+	else if(ball->y < -0.85f && ball->yDirect < 0.0f)
+	{
+		ball->yDirect = -ball->yDirect; 
 	}
 
+	//red paddle
+	if(!((ball->x - 0.05f)>(paddleRed->x + 0.05f)) && !((ball->x + 0.05f)<(paddleRed->x - 0.05f)) && 
+		!((ball->y - 0.05f)>(paddleRed->y + 0.05f)) && !((ball->y + 0.05f)<(paddleRed->y -0.05f))){
+		//reverse directions
+		ball->xDirect = -1.0f;
+		}
+	//blue paddle
+	else if(!((ball->x - 0.05f)>(paddleBlu->x + 0.05f)) && !((ball->x + 0.05f)<(paddleBlu->x - 0.05f)) &&
+		!((ball->y - 0.05f)>(paddleBlu->y + 0.05f)) && !((ball->y + 0.05f)<(paddleBlu->y - 0.05f))){
+		//reverse directions
+		ball->xDirect = 1.0f;
+	}
+
+
+}
+
+void render(){
+	glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	paddleRed->draw();
+	paddleBlu->draw();
+	blockTop->draw();
+	blockBot->draw();
+
+	//win conditions
+	if(ball->x > 1.33){
+		medal->draw();
+		medal->x = -0.5f;
+	}
+	else if(ball->x < -1.33){
+		medal->draw();
+		medal->x = 0.5f;
+	}
+	else{
+		ball->draw();
+	}
+
+	SDL_GL_SwapWindow(displayWindow);
+
+}
+
+void cleanUp(){
 	SDL_Quit();
+}
+
+int main(int argc, char *argv[]){
+	setUp();
+	while(processEvents()){
+		update();
+		render();
+	}
+	cleanUp();
 	return 0;
+
 }
