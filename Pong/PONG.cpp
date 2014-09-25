@@ -152,6 +152,7 @@ void render(){
 }
 
 void cleanUp(){
+	delete ball, paddleRed, paddleBlu, medal, blockTop, blockBot;
 	SDL_Quit();
 }
 
