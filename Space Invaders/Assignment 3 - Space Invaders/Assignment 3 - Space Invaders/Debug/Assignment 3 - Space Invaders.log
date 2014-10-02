@@ -1,0 +1,17 @@
+﻿Build started 10/1/2014 8:00:52 PM.
+     1>Project "c:\Users\Nick\documents\visual studio 2012\Projects\Assignment 3 - Space Invaders\Assignment 3 - Space Invaders\Assignment 3 - Space Invaders.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\SDL2\include /IC:\SDL2_image\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt App.cpp Entity.cpp SpaceInvaders.cpp
+         Entity.cpp
+         App.cpp
+     1>c:\users\nick\documents\visual studio 2012\projects\assignment 3 - space invaders\assignment 3 - space invaders\app.cpp(297): error C2228: left of '.aliveStatus' must have class/struct/union
+                 type is 'Entity *'
+                 did you intend to use '->' instead?
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         SpaceInvaders.cpp
+     1>Done Building Project "c:\Users\Nick\documents\visual studio 2012\Projects\Assignment 3 - Space Invaders\Assignment 3 - Space Invaders\Assignment 3 - Space Invaders.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:02.05
