@@ -180,7 +180,9 @@ void App::renderGameLevel(){
 		bullet.draw();
 	}
 	for(int i=0; i<MAX_ASTEROIDS; i++){
-		asteroids[i]->draw();
+		if(asteroids[i]->visible){
+			asteroids[i]->draw();
+		}
 	}
 }
 
@@ -197,7 +199,7 @@ void App::updateGameLevel(){
 	for(int i=0; i<MAX_ASTEROIDS; i++){
 		if(asteroids[i]->collided(&bullet)){
 			bullet.visible = false;
-			delete asteroids[i];
+			asteroids[i]->visible = false;
 		}
 	}
 
