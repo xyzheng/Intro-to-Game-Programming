@@ -78,6 +78,7 @@ private:
 
 	vector<Entity*> enemies;
 	vector<Entity*> gems;
-	Entity* player;
+	Entity* playerOne;
+	Entity* playerTwo;
 
 };

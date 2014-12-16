@@ -45,5 +45,4 @@ data=
 
 [ObjectsLayer]
 type=Player
-location=77,257,0,0
-
+location=90,257,0,0

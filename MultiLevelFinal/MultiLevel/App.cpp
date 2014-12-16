@@ -7,7 +7,7 @@ using namespace std;
 
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
-#define TILE_SIZE 0.1f
+#define TILE_SIZE 0.075f
 #define SPRITE_COUNT_X 16
 #define SPRITE_COUNT_Y 8
 #define WORLD_OFFSET_X 0
@@ -122,29 +122,39 @@ void App::init(){
 
 	glViewport(0, 0, 800, 600);
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-2.66, 2.66, -2.0, 2.0, -2.0, 2.0);
+	glOrtho(-1.33, 1.33, -1.0, 1.0, -1.0, 1.0);
 }
 
 void App::reset(){
-	//delete player;
+//	delete player;
 	score = 0;
-	player = new Entity(sheetSprite, -0.9f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
-	player->xVelo = 0.0f;
-	player->yVelo = 0.0f;
-//	player->xAcc = 0.0f;
-	player->yAcc = 0.0f;
-	player->yFric = 1.0f;
-	player->xFric = 1.0f;
-	player->collidedBot = false;
-	player->collidedTop = false;
-	player->collidedLeft = false;
-	player->collidedRight = false;
+	playerOne = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerOne->collidedTop = false;
+	playerOne->collidedBot = false;
+	playerOne->collidedRight = false;
+	playerOne->collidedLeft = false;
+	playerOne->xVelo = 0.0f;
+	playerOne->yVelo = 0.0f;
+	playerOne->yAcc = 0.0f;
+	playerOne->yFric = 1.0f;
+	playerOne->xFric = 1.0f;
+	
+	playerTwo = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerTwo->collidedTop = false;
+	playerTwo->collidedBot = false;
+	playerTwo->collidedRight = false;
+	playerTwo->collidedLeft = false;
+	playerTwo->xVelo = 0.0f;
+	playerTwo->yVelo = 0.0f;
+	playerTwo->yAcc = 0.0f;
+	playerTwo->yFric = 1.0f;
+	playerTwo->xFric = 1.0f;
 }
 
 //place the entities
 void App::placeEntity(string& type, float placeX, float placeY){
 //	if(type == "Player"){
-//		player = new Entity(sheetSprite, placeX, placeY, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.1f, 1.0f, true);
+//		player = new Entity(sheetSprite, placeX, placeY, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.04f, 0.04f, 1.0f, true);
 //	}
 //	else if(type == "Gem"){
 //		gems.push_back(new Entity(sheetSprite, placeX, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.02f, 0.02f, 1.0f, true));
@@ -261,7 +271,7 @@ bool App::readEntityData(ifstream& stream){
 void App::render(){
 	glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glLoadIdentity();
+//	glLoadIdentity();
 
 	switch(state){
 	case STATE_MAIN_MENU:
@@ -280,26 +290,45 @@ void App::render(){
 //renders main menu
 //GLuint fontTexture, string text, float size, float spacing, float r, float g, float b, float a, float x, float y
 void App::renderMainMenu(){
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	drawText(font, "SANCTUARY", 0.2f, -0.1f, 1.0f, 1.0f, 1.0f, 1.0f, -0.4f, 0.7f);
 	drawText(font, "Collect all gems", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.5f);	
 	drawText(font, "Arrow keys to move", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.3f);
 	drawText(font, "Space to jump", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.1f);
 	drawText(font, "Reach the end", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, -0.1f);
 	drawText(font, "Press SPACE to start", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, -0.3f);
+	glPopMatrix();
 }
 
 void App::renderGameLevel(){
-
-//	string c = to_string(levelData[25][11]);
-//	drawText(font, c, 0.2f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+	glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	glLoadIdentity();
-	glTranslatef(-TILE_SIZE * (mapWidth/12), TILE_SIZE * (mapHeight/2), 0.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	float translateX = 0.0f;
+		if (playerOne->x > 1.33)
+			translateX = -playerOne->x;
+		else
+			translateX = -1.33f;
+		if (playerOne->x > 6.66)
+			translateX = -6.66f;
+	string c = to_string(playerTwo->x);
+
+	glTranslatef(translateX + 0.32f, 1.3f, 0.0f);
+//	drawText(font, c, 0.2f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.2f);
+//	glTranslatef(-TILE_SIZE * (mapWidth/9.5), TILE_SIZE * (mapHeight/2), 0.0f);
+
+	playerOne->draw(sheetSprite, 80, 16, 8);
+	playerTwo->draw(sheetSprite, 80, 16, 8);
 	makeLevel();
+//	glLoadIdentity();
+//	glTranslatef(-TILE_SIZE * (mapWidth/10), TILE_SIZE * (mapHeight/2), 0.0f);
 
-	glLoadIdentity();
-	player->draw(sheetSprite, 80, 16, 8);
-//	glTranslatef(-TILE_SIZE * (mapWidth/12), TILE_SIZE * (mapHeight/2), 0.0f);
+	glPopMatrix();
 }
 
 //renders game over
@@ -350,6 +379,8 @@ void App::makeLevel(){
 	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDrawArrays(GL_QUADS, 0, vertexData.size()/2);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 bool App::updateAndRender(){
@@ -375,37 +406,72 @@ bool App::updateAndRender(){
 
 void App::updateGameLevel(){
 	if(keys[SDL_SCANCODE_RIGHT]){
-		player->xVelo += 2.0f * FIXED_TIMESTEP;
-		player->xAcc = 0.5f;
+		playerOne->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = 0.5f;
 	}
 	if(keys[SDL_SCANCODE_LEFT]){
-		player->xVelo -= 2.0f * FIXED_TIMESTEP;
-		player->xAcc = -0.5f;
+		playerOne->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = -0.5f;
 	}
 	else{
-		player->xAcc = 0.0f;
+		playerOne->xAcc = 0.0f;
 	}
-	if(keys[SDL_SCANCODE_SPACE] && player->collidedBot){
-		player->yVelo = 2.0f;
-		player->collidedBot = false;
+	if(keys[SDL_SCANCODE_UP] && playerOne->collidedBot){
+		playerOne->yVelo = 2.0f;
+		playerOne->collidedBot = false;
+	}
+	if(playerOne->x < 0.0f){
+		playerOne->x = 0.0f;
 	}
 
-	//player time steps
-	player->yVelo = lerp(player->yVelo, 0.0f, FIXED_TIMESTEP * player->yFric);
-	player->yVelo += player->yAcc * FIXED_TIMESTEP;
-	player->y += player->yVelo * FIXED_TIMESTEP;
-//	if(!player->collidedBot){
-//		player->yAcc = -9.8f;
-//	}
+	//player two keys
+	if(keys[SDL_SCANCODE_D]){
+		playerTwo->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = 0.5f;
+	}
+	if(keys[SDL_SCANCODE_A]){
+		playerTwo->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = -0.5f;
+	}
+	else{
+		playerTwo->xAcc = 0.0f;
+	}
+	if(keys[SDL_SCANCODE_W] && playerTwo->collidedBot){
+		playerTwo->yVelo = 2.0f;
+		playerTwo->collidedBot = false;
+	}
+	if(playerTwo->x < 0.0f){
+		playerTwo->x = 0.0f;
+	}
 
-	collideWithMapY(player);
+
+	//playerOne time steps
+	playerOne->yVelo = lerp(playerOne->yVelo, 0.0f, FIXED_TIMESTEP * playerOne->yFric);
+	playerOne->yVelo += playerOne->yAcc * FIXED_TIMESTEP;
+	playerOne->y += playerOne->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerOne);
 	
-	player->xVelo = lerp(player->xVelo, 0.0f, FIXED_TIMESTEP * player->xFric);
-	player->xVelo += player->xAcc * FIXED_TIMESTEP;
-	player->x += player->xVelo * FIXED_TIMESTEP;
-	player->yVelo += gravity * FIXED_TIMESTEP;
+	playerOne->xVelo = lerp(playerOne->xVelo, 0.0f, FIXED_TIMESTEP * playerOne->xFric);
+	playerOne->xVelo += playerOne->xAcc * FIXED_TIMESTEP;
+	playerOne->x += playerOne->xVelo * FIXED_TIMESTEP;
+	playerOne->yVelo += gravity * FIXED_TIMESTEP;
 
-	collideWithMapX(player);
+	collideWithMapX(playerOne);
+
+	//playerTwo time steps
+	playerTwo->yVelo = lerp(playerTwo->yVelo, 0.0f, FIXED_TIMESTEP * playerTwo->yFric);
+	playerTwo->yVelo += playerTwo->yAcc * FIXED_TIMESTEP;
+	playerTwo->y += playerTwo->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerTwo);
+	
+	playerTwo->xVelo = lerp(playerTwo->xVelo, 0.0f, FIXED_TIMESTEP * playerTwo->xFric);
+	playerTwo->xVelo += playerTwo->xAcc * FIXED_TIMESTEP;
+	playerTwo->x += playerTwo->xVelo * FIXED_TIMESTEP;
+	playerTwo->yVelo += gravity * FIXED_TIMESTEP;
+
+	collideWithMapX(playerTwo);
 /*
 	//enemy time steps
 	for(size_t i=0; i<enemies.size(); i++){
@@ -435,16 +501,25 @@ void App::update(){
 			if(event.key.keysym.scancode == SDL_SCANCODE_R){
 				state = STATE_GAME_OVER;
 			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
+				SDL_Quit();
+			}
 		}
 		if(state == STATE_MAIN_MENU){
 			if(event.key.keysym.scancode == SDL_SCANCODE_SPACE){
 				reset();
 				state = STATE_GAME_LEVEL;
 			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
+				SDL_Quit();
+			}
 		}
 		if(state == STATE_GAME_OVER){
 			if(event.key.keysym.scancode == SDL_SCANCODE_RETURN){
 				state = STATE_MAIN_MENU;
+			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
+				SDL_Quit();
 			}
 		}
 	}
@@ -480,6 +555,7 @@ bool App::isSolid(int tile){
 void App::worldToTileCoord(float worldX, float worldY, int* gridX, int* gridY){
 	*gridX = (int)((worldX + (WORLD_OFFSET_X))/ TILE_SIZE);
 	*gridY = (int)((-worldY + (WORLD_OFFSET_Y))/ TILE_SIZE);
+
 }
 
 float App::getCollideX(float x, float y){
@@ -500,7 +576,7 @@ float App::getCollideY(float x, float y){
 	int gridX;
 	int gridY;
 	worldToTileCoord(x, y, &gridX, &gridY);
-	if(gridX < 0 || gridX > 128 || gridY < 0 || gridY > 32){
+ 	if(gridX < 0 || gridX > 128 || gridY < 0 || gridY > 32){
 		return 0.0f;
 	}
 	if(isSolid(levelData[gridY][gridX])){
@@ -511,14 +587,14 @@ float App::getCollideY(float x, float y){
 }
 
 void App::collideWithMapY(Entity* ent){
-	float adjustLeft = getCollideY(ent->x - (ent->width / 4), ent->y - (ent->height / 2));
+	float adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y - (ent->height / 2));
 	float adjustCentre = getCollideY(ent->x, ent->y - (ent->height / 2));
-	float adjustRight = getCollideY(ent->x + (ent->width / 4), ent->y - (ent->height / 2 ));
+	float adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y - (ent->height / 2 ));
 
 	if (adjustLeft != 0.0f || adjustCentre != 0.0f || adjustCentre != 0.0f) {
 	
-		//float adjustMax = max(adjustLeft, adjustCentre);
-		float adjust = max({adjustLeft, adjustCentre, adjustRight});
+		float adjustMax = max(adjustLeft, adjustCentre);
+		float adjust = max(adjustRight, adjustMax);
 		ent->y += adjust;
 		ent->yVelo = 0.0f;
 		ent->collidedBot = true;
@@ -526,21 +602,47 @@ void App::collideWithMapY(Entity* ent){
 
 	// top-side
 
-	adjustLeft = getCollideY(ent->x - (ent->width / 4), ent->y + (ent->height / 2));
+	adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y + (ent->height / 2));
 	adjustCentre = getCollideY(ent->x, ent->y - (ent->height / 2));
-	adjustRight = getCollideY(ent->x + (ent->width / 4), ent->y + (ent->height / 2));	
+	adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y + (ent->height / 2));	
 	if (adjustLeft != 0.0f || adjustCentre != 0.0f || adjustCentre != 0.0f) {
-		//float adjustMax = max(adjustLeft, adjustCentre);
-		float adjust = max({adjustLeft, adjustCentre, adjustRight});
+		float adjustMax1 = max(adjustLeft, adjustCentre);
+		float adjust = max(adjustMax1, adjustRight);
 
-		ent->y += adjust - TILE_SIZE;
+		ent->y += adjust - TILE_SIZE/2;
 		ent->yVelo = 0.0f;
 		ent->collidedTop = true;
 	}
-	
 }
 
 void App::collideWithMapX(Entity* ent){
+
+	float adjustTop = getCollideX(ent->x + (ent->width / 2), ent->y + (ent->height / 4)); // not top right corner to avoid double collisions
+	float adjustMiddle = getCollideX(ent->x + (ent->width / 2), ent->y);
+	float adjustBottom = getCollideX(ent->x + (ent->width / 2), ent->y - (ent->height / 4)); // not bottom right corner to avoid collisions w/ ground
+
+	
+	if (adjustTop != 0.0f || adjustMiddle != 0.0f || adjustBottom != 0.0f) {
+		float adjustMax = min(adjustTop, adjustMiddle);
+		float adjust = min(adjustMax, adjustBottom );
+		ent->x += adjust;
+		ent->xVelo = 0.0f;
+		ent->collidedRight = true;
+	}
+	// left-side
+	adjustTop = getCollideX(ent->x - (ent->width / 2), ent->y + (ent->height / 4));
+	adjustMiddle = getCollideX(ent->x - (ent->width / 2), ent->y);
+	adjustBottom = getCollideX(ent->x - (ent->width / 2), ent->y - (ent->height / 4));
+
+	//adjust = checkPointForGridCollisionX(ent->x - (ent->width / 2), ent->y);
+	if (adjustTop != 0.0f || adjustMiddle != 0.0f || adjustBottom != 0.0f) {
+		float adjustMax1 = min(adjustTop, adjustMiddle);
+		float adjust = min(adjustMax1, adjustBottom );
+		ent->x -= adjust;
+		ent->x -= TILE_SIZE - 0.01f;
+		ent->xVelo = 0.0f;
+		ent->collidedLeft = true;
+	}
 
 }
 

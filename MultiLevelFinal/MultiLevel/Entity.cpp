@@ -8,7 +8,10 @@ Entity::Entity(unsigned int spritesheet, float x, float y, float xD, float yD, f
 	textureID(spritesheet), x(x), y(y), xD(xD), yD(yD), rotation(rotate), u(u), v(v), width(width), height(height),
 		mass(mass), dynamic(true), visible(true){}//, gridX(0), gridY(0){}
 
-void Entity::draw(int spriteTexture, int index, int spriteCountX, int spriteCountY){
+Entity::~Entity(){
+}
+
+void Entity::draw(int spriteTexture, int index, int	spriteCountX, int spriteCountY){
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glMatrixMode(GL_MODELVIEW);
