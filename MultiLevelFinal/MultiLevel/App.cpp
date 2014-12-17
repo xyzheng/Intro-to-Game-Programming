@@ -122,6 +122,7 @@ App::~App(){
 		Mix_FreeChunk(lavas);
 		Mix_FreeChunk(next);
 		Mix_FreeChunk(spike);
+		Mix_FreeChunk(cheer);
 		Mix_FreeMusic(menu);
 	}
 	SDL_Quit();
@@ -145,6 +146,7 @@ void App::resetLevelOne(){
     next = Mix_LoadWAV("nextlevel.wav");
     spike = Mix_LoadWAV("spikes.wav");
     lavas = Mix_LoadWAV("lava.wav");
+	cheer = Mix_LoadWAV("cheer.wav");
 
 	for(int i=0; i<mapHeight; i++){
 		delete [] levelData[i];
@@ -857,19 +859,19 @@ void App::updateGameLevelOne(){
 	for(size_t i=0; i<blueGems.size(); i++){
 		if(playerOne->collideX(blueGems[i]) || playerOne->collideY(blueGems[i])){
 			blueGems[i]->visible = false;
-		//	delete blueGems[i];
+			Mix_PlayChannel(-1, gem, 0);
 		}
 	}
 	for(size_t i=0; i<greenGems.size(); i++){
 		if(playerTwo->collideX(greenGems[i]) || playerTwo->collideY(greenGems[i])){
 			greenGems[i]->visible = false;
-		//	delete greenGems[i];
+			Mix_PlayChannel(-1, gem, 0);
 		}
 	}
 	for(size_t i=0; i<exitKeys.size(); i++){
 		if(playerOne->collideX(exitKeys[i]) || playerOne->collideY(exitKeys[i]) || playerTwo->collideX(exitKeys[i]) || playerTwo->collideY(exitKeys[i])){
 			exitKeys[i]->visible = false;
-		//	delete exitKeys[i];
+			Mix_PlayChannel(-1, cheer, 0);
 		}
 	}
 	if(blueGems.size() == 0 && greenGems.size() == 0 && exitKeys.size() == 0){
@@ -965,19 +967,19 @@ void App::updateGameLevelTwo(){
 	for(size_t i=0; i<blueGems.size(); i++){
 		if(playerOne->collideX(blueGems[i]) || playerOne->collideY(blueGems[i])){
 			blueGems[i]->visible = false;
-		//	delete blueGems[i];
+			Mix_PlayChannel(-1, gem, 0);
 		}
 	}
 	for(size_t i=0; i<greenGems.size(); i++){
 		if(playerTwo->collideX(greenGems[i]) || playerTwo->collideY(greenGems[i])){
 			greenGems[i]->visible = false;
-		//	delete greenGems[i];
+			Mix_PlayChannel(-1, gem, 0);
 		}
 	}
 	for(size_t i=0; i<exitKeys.size(); i++){
 		if(playerOne->collideX(exitKeys[i]) || playerOne->collideY(exitKeys[i]) || playerTwo->collideX(exitKeys[i]) || playerTwo->collideY(exitKeys[i])){
 			exitKeys[i]->visible = false;
-		//	delete exitKeys[i];
+			Mix_PlayChannel(-1, cheer, 0);
 		}
 	}
 	if(blueGems.size() == 0 && greenGems.size() == 0 && exitKeys.size() == 0){
@@ -1221,26 +1223,25 @@ float App::getCollideY(float x, float y){
 }
 
 void App::collideWithMapY(Entity* ent){
-	float adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y - (ent->height / 2));
-	float adjustCentre = getCollideY(ent->x, ent->y - (ent->height / 2));
-	float adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y - (ent->height / 2 ));
-
-	if (adjustLeft != 0.0f || adjustCentre != 0.0f || adjustCentre != 0.0f) {
+	//bot
+	float adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y - (ent->height / 4));
+	float adjustMid = getCollideY(ent->x, ent->y - (ent->height / 2));
+	float adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y - (ent->height / 4));
+	if (adjustLeft != 0.0f || adjustMid != 0.0f || adjustMid != 0.0f) {
 	
-		float adjustMax = max(adjustLeft, adjustCentre);
+		float adjustMax = max(adjustLeft, adjustMid);
 		float adjust = max(adjustRight, adjustMax);
 		ent->y += adjust;
 		ent->yVelo = 0.0f;
 		ent->collidedBot = true;
 	}
 
-	// top-side
-
-	adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y + (ent->height / 2));
-	adjustCentre = getCollideY(ent->x, ent->y - (ent->height / 2));
-	adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y + (ent->height / 2));	
-	if (adjustLeft != 0.0f || adjustCentre != 0.0f || adjustCentre != 0.0f) {
-		float adjustMax1 = max(adjustLeft, adjustCentre);
+	//top
+	adjustLeft = getCollideY(ent->x - (ent->width / 2), ent->y + (ent->height / 4));
+	adjustMid= getCollideY(ent->x, ent->y - (ent->height / 2));
+	adjustRight = getCollideY(ent->x + (ent->width / 2), ent->y + (ent->height / 4));	
+	if (adjustLeft != 0.0f || adjustMid != 0.0f || adjustMid != 0.0f) {
+		float adjustMax1 = max(adjustLeft, adjustMid);
 		float adjust = max(adjustMax1, adjustRight);
 
 		ent->y += adjust - TILE_SIZE/2;
@@ -1250,28 +1251,27 @@ void App::collideWithMapY(Entity* ent){
 }
 
 void App::collideWithMapX(Entity* ent){
-
-	float adjustTop = getCollideX(ent->x + (ent->width / 2), ent->y + (ent->height / 4)); // not top right corner to avoid double collisions
-	float adjustMiddle = getCollideX(ent->x + (ent->width / 2), ent->y);
-	float adjustBottom = getCollideX(ent->x + (ent->width / 2), ent->y - (ent->height / 4)); // not bottom right corner to avoid collisions w/ ground
+	//right
+	float adjustTop = getCollideX(ent->x + (ent->width / 2), ent->y + (ent->height / 4)); 
+	float adjustMid = getCollideX(ent->x + (ent->width / 2), ent->y);
+	float adjustBot = getCollideX(ent->x + (ent->width / 2), ent->y - (ent->height / 4)); 
 
 	
-	if (adjustTop != 0.0f || adjustMiddle != 0.0f || adjustBottom != 0.0f) {
-		float adjustMax = min(adjustTop, adjustMiddle);
-		float adjust = min(adjustMax, adjustBottom );
+	if (adjustTop != 0.0f || adjustMid != 0.0f || adjustBot != 0.0f) {
+		float adjustMax = min(adjustTop, adjustMid);
+		float adjust = min(adjustMax, adjustBot);
 		ent->x += adjust;
 		ent->xVelo = 0.0f;
 		ent->collidedRight = true;
 	}
-	// left-side
+	// left
 	adjustTop = getCollideX(ent->x - (ent->width / 2), ent->y + (ent->height / 4));
-	adjustMiddle = getCollideX(ent->x - (ent->width / 2), ent->y);
-	adjustBottom = getCollideX(ent->x - (ent->width / 2), ent->y - (ent->height / 4));
+	adjustMid = getCollideX(ent->x - (ent->width / 2), ent->y);
+	adjustBot = getCollideX(ent->x - (ent->width / 2), ent->y - (ent->height / 4));
 
-	//adjust = checkPointForGridCollisionX(ent->x - (ent->width / 2), ent->y);
-	if (adjustTop != 0.0f || adjustMiddle != 0.0f || adjustBottom != 0.0f) {
-		float adjustMax1 = min(adjustTop, adjustMiddle);
-		float adjust = min(adjustMax1, adjustBottom );
+	if (adjustTop != 0.0f || adjustMid != 0.0f || adjustBot != 0.0f) {
+		float adjustMax1 = min(adjustTop, adjustMid);
+		float adjust = min(adjustMax1, adjustBot);
 		ent->x -= adjust;
 		ent->x -= TILE_SIZE - 0.01f;
 		ent->xVelo = 0.0f;

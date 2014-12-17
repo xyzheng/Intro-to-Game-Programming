@@ -79,6 +79,7 @@ private:
     Mix_Chunk* next;
     Mix_Chunk* spike;
     Mix_Chunk* lavas;
+	Mix_Chunk* cheer;
     Mix_Music* menu;
 
 	ParticleEmitter* emitterOne;
