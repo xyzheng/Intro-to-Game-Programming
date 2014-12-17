@@ -34,7 +34,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="level.txt">
+    <Text Include="levelOne.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="levelTwo.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

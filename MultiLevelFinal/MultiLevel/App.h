@@ -24,16 +24,22 @@ public:
 
 	void init();
 	void update();
-	void reset();
+	void resetLevelOne();
+	void resetLevelTwo();
+	void resetLevelThree();
 
 	void render();
 	void renderMainMenu();
-	void renderGameLevel();
+	void renderInstrMenu();
+	void renderLevelOne();
+	void renderLevelTwo();
+//	void renderLevelThree();
 	void renderGameOver();
 
-	void updateGameLevel();
+	void updateGameLevelOne();
+	void updateGameLevelTwo();
+	void updateGameLevelThree();
 
-	void readFile();
 	bool readHeader();
 	bool readLayerData();
 	bool readEntityData();
@@ -42,7 +48,9 @@ public:
 
 	void placeEntity(string& type, float placeX, float placeY);
 
-	void read();
+	void readLevelOne();
+	void readLevelTwo();
+	void readLevelThree();
 	bool readHeader(ifstream& stream);
 	bool readLayerData(ifstream& stream);
 	bool readEntityData(ifstream& stream);
@@ -75,10 +83,16 @@ private:
 	unsigned char** levelData;
 	int mapWidth;
 	int mapHeight;
+	int marginX;
+	int marginY;
 
-	vector<Entity*> enemies;
-	vector<Entity*> gems;
+	vector<Entity*> spikes;
+	vector<Entity*> blueGems;
+	vector<Entity*> greenGems;
+	vector<Entity*> exitKeys;
 	Entity* playerOne;
 	Entity* playerTwo;
+	Entity* exitTop;
+	Entity* exitBot;
 
 };

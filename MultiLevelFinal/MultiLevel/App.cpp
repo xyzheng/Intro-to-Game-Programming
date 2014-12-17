@@ -8,15 +8,15 @@ using namespace std;
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
 #define TILE_SIZE 0.075f
-#define SPRITE_COUNT_X 16
-#define SPRITE_COUNT_Y 8
+#define SPRITE_COUNT_X 30
+#define SPRITE_COUNT_Y 30
 #define WORLD_OFFSET_X 0
 #define WORLD_OFFSET_Y 0 
 
 float timeLeftOver = 0.0f;
 float lastFrameTicks;
 
-enum GameState {STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER};
+enum GameState {STATE_MAIN_MENU, STATE_INSTR_MENU, STATE_LEVEL_ONE, STATE_LEVEL_TWO, STATE_LEVEL_THREE, STATE_GAME_OVER};
 
 float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
@@ -91,7 +91,9 @@ void drawText(GLuint fontTexture, string text, float size, float spacing, float 
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDrawArrays(GL_QUADS, 0, text.size() * 4);
 	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 App::App(){
@@ -102,10 +104,10 @@ App::App(){
 
 	state = STATE_MAIN_MENU;
 
-	sheetSprite = loadTexture("arne_sprites.png");
+	sheetSprite = loadTexture("spritesheet_rgba.png");
 	font = loadTexture("spritesheet_font.png");
 
-	read();
+	//readLevelOne();
 
 	gravity = -9.8f;
 }
@@ -125,8 +127,64 @@ void App::init(){
 	glOrtho(-1.33, 1.33, -1.0, 1.0, -1.0, 1.0);
 }
 
-void App::reset(){
-//	delete player;
+void App::resetLevelOne(){
+	readLevelOne();
+	score = 0;
+	playerOne = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerOne->collidedTop = false;
+	playerOne->collidedBot = false;
+	playerOne->collidedRight = false;
+	playerOne->collidedLeft = false;
+	playerOne->xVelo = 0.0f;
+	playerOne->yVelo = 0.0f;
+	playerOne->yAcc = 0.0f;
+	playerOne->yFric = 1.0f;
+	playerOne->xFric = 1.0f;
+	
+	playerTwo = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerTwo->collidedTop = false;
+	playerTwo->collidedBot = false;
+	playerTwo->collidedRight = false;
+	playerTwo->collidedLeft = false;
+	playerTwo->xVelo = 0.0f;
+	playerTwo->yVelo = 0.0f;
+	playerTwo->yAcc = 0.0f;
+	playerTwo->yFric = 1.0f;
+	playerTwo->xFric = 1.0f;
+}
+
+void App::resetLevelTwo(){
+//	delete playerOne;
+//	delete playerTwo;
+	readLevelTwo();
+	score = 0;
+	playerOne = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerOne->collidedTop = false;
+	playerOne->collidedBot = false;
+	playerOne->collidedRight = false;
+	playerOne->collidedLeft = false;
+	playerOne->xVelo = 0.0f;
+	playerOne->yVelo = 0.0f;
+	playerOne->yAcc = 0.0f;
+	playerOne->yFric = 1.0f;
+	playerOne->xFric = 1.0f;
+	
+	playerTwo = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
+	playerTwo->collidedTop = false;
+	playerTwo->collidedBot = false;
+	playerTwo->collidedRight = false;
+	playerTwo->collidedLeft = false;
+	playerTwo->xVelo = 0.0f;
+	playerTwo->yVelo = 0.0f;
+	playerTwo->yAcc = 0.0f;
+	playerTwo->yFric = 1.0f;
+	playerTwo->xFric = 1.0f;
+}
+
+void App::resetLevelThree(){
+//	delete playerOne;
+//	delete playerTwo;
+	readLevelThree();
 	score = 0;
 	playerOne = new Entity(sheetSprite, -0.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.05f, 1.0f, true);
 	playerOne->collidedTop = false;
@@ -153,18 +211,73 @@ void App::reset(){
 
 //place the entities
 void App::placeEntity(string& type, float placeX, float placeY){
-//	if(type == "Player"){
-//		player = new Entity(sheetSprite, placeX, placeY, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.04f, 0.04f, 1.0f, true);
-//	}
-//	else if(type == "Gem"){
-//		gems.push_back(new Entity(sheetSprite, placeX, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.02f, 0.02f, 1.0f, true));
-//	}
+
+	if(type == "Spikes"){
+		spikes.push_back(new Entity(sheetSprite, placeX + 0.05f, placeY + 0.075f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true));
+	}
+	if(type == "ExitTop"){
+		exitTop = new Entity(sheetSprite, placeX, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true);
+	}
+	if(type == "ExitBot"){
+		exitBot = new Entity(sheetSprite, placeX, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true);
+	}
+	if(type == "BlueGem"){
+		blueGems.push_back(new Entity(sheetSprite, placeX + 0.4f, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true));
+	}
+	if(type == "GreenGem"){
+		greenGems.push_back(new Entity(sheetSprite, placeX, placeY, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true));
+	}
+	if(type == "Key"){
+		exitKeys.push_back(new Entity(sheetSprite, placeX + 0.07f, placeY - 0.05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.05f, 0.075f, 0.0f, true));
+	}
 }
 
-//open file and read
-void App::read(){
+//open level 1 file and read
+void App::readLevelOne(){
 	ifstream ifs;
-	ifs.open("level.txt");
+	ifs.open("levelOne.txt");
+	string line;
+	while(getline(ifs, line)){
+		if(line == "[header]"){
+			if(!readHeader(ifs)){
+				return;
+			}
+		}
+		else if(line == "[layer]"){
+			readLayerData(ifs);
+		}
+		else if(line == "[ObjectsLayer]"){
+			readEntityData(ifs);
+		}
+	}
+	ifs.close();
+}
+
+//open level 2 file and read
+void App::readLevelTwo(){
+	ifstream ifs;
+	ifs.open("levelTwo.txt");
+	string line;
+	while(getline(ifs, line)){
+		if(line == "[header]"){
+			if(!readHeader(ifs)){
+				return;
+			}
+		}
+		else if(line == "[layer]"){
+			readLayerData(ifs);
+		}
+		else if(line == "[ObjectsLayer]"){
+			readEntityData(ifs);
+		}
+	}
+	ifs.close();
+}
+
+//open level 3 file and read
+void App::readLevelThree(){
+	ifstream ifs;
+	ifs.open("levelThree.txt");
 	string line;
 	while(getline(ifs, line)){
 		if(line == "[header]"){
@@ -277,9 +390,18 @@ void App::render(){
 	case STATE_MAIN_MENU:
 		renderMainMenu();
 		break;
-	case STATE_GAME_LEVEL:
-		renderGameLevel();
+	case STATE_INSTR_MENU:
+		renderInstrMenu();
 		break;
+	case STATE_LEVEL_ONE:
+		renderLevelOne();
+		break;
+	case STATE_LEVEL_TWO:
+		renderLevelTwo();
+		break;
+//	case STATE_LEVEL_THREE:
+//		renderLevelThree();
+//		break;
 	case STATE_GAME_OVER:
 		renderGameOver();
 		break;
@@ -294,15 +416,25 @@ void App::renderMainMenu(){
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	drawText(font, "SANCTUARY", 0.2f, -0.1f, 1.0f, 1.0f, 1.0f, 1.0f, -0.4f, 0.7f);
-	drawText(font, "Collect all gems", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.5f);	
-	drawText(font, "Arrow keys to move", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.3f);
-	drawText(font, "Space to jump", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.1f);
-	drawText(font, "Reach the end", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, -0.1f);
-	drawText(font, "Press SPACE to start", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, -0.3f);
+	drawText(font, "I for instructions", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.5f);	
+	drawText(font, "Escape to quit", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.3f);
 	glPopMatrix();
 }
 
-void App::renderGameLevel(){
+void App::renderInstrMenu(){
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	drawText(font, "INSTRUCTIONS", 0.2f, -0.1f, 1.0f, 1.0f, 1.0f, 1.0f, -0.6f, 0.7f);
+	drawText(font, "Collect all gems", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.3f, 0.5f);	
+	drawText(font, "Arrow keys to move for player 1", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.5f, 0.3f);
+	drawText(font, "WAD keys to move for player 2", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.5f, 0.1f);
+	drawText(font, "Collect corresponding gems & key and get to the end", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.8f, -0.1f);
+	drawText(font, "Press 1, 2, 3 for levels", 0.08f, -0.05f, 1.0f, 1.0f, 1.0f, 1.0f, -0.4f, -0.3f);
+	glPopMatrix();
+}
+
+void App::renderLevelOne(){
 	glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -316,17 +448,65 @@ void App::renderGameLevel(){
 			translateX = -1.33f;
 		if (playerOne->x > 6.66)
 			translateX = -6.66f;
-	string c = to_string(playerTwo->x);
 
-	glTranslatef(translateX + 0.32f, 1.3f, 0.0f);
-//	drawText(font, c, 0.2f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.2f);
-//	glTranslatef(-TILE_SIZE * (mapWidth/9.5), TILE_SIZE * (mapHeight/2), 0.0f);
+	glTranslatef(translateX + 0.32f, 1.4f, 0.0f);
 
-	playerOne->draw(sheetSprite, 80, 16, 8);
-	playerTwo->draw(sheetSprite, 80, 16, 8);
+	playerOne->draw(sheetSprite, 27, 30, 30);
+	playerTwo->draw(sheetSprite, 57, 30, 30);
+	for(size_t i=0; i<spikes.size(); i++){
+		spikes[i]->draw(sheetSprite, 575, 30, 30);
+	}
+	exitTop->draw(sheetSprite, 137, 30, 30);
+	exitBot->draw(sheetSprite, 138, 30, 30);	
+	for(size_t i=0; i<blueGems.size(); i++){
+		if(blueGems[i]->visible){
+			blueGems[i]->draw(sheetSprite, 288, 30, 30);
+		}
+	}
+	for(size_t i=0; i<greenGems.size(); i++){
+		if(greenGems[i]->visible){
+			greenGems[i]->draw(sheetSprite, 286, 30, 30);
+		}
+	}
+	for(size_t i=0; i<exitKeys.size(); i++){
+		if(exitKeys[i]->visible){
+			exitKeys[i]->draw(sheetSprite, 409, 30, 30);
+		}
+	}
 	makeLevel();
-//	glLoadIdentity();
-//	glTranslatef(-TILE_SIZE * (mapWidth/10), TILE_SIZE * (mapHeight/2), 0.0f);
+//	string c = to_string(exitKeys[0]->y);
+//	drawText(font, c, 0.2f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.2f);
+//	string d = to_string(exitKeys[0]->x);
+//	drawText(font, d, 0.2f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.5f);
+
+	glPopMatrix();
+}
+
+void App::renderLevelTwo(){
+	glClearColor(162.0f/255.0f, 208.0f/255.0f, 89.0f/255.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	float translateX = 0.0f;
+		if (playerOne->x > 1.33)
+			translateX = -playerOne->x;
+		else
+			translateX = -1.33f;
+		if (playerOne->x > 6.66)
+			translateX = -6.66f;
+
+	glTranslatef(translateX + 0.32f, 1.4f, 0.0f);
+//	playerOne->draw(sheetSprite, 27, 30, 30);
+//	playerTwo->draw(sheetSprite, 57, 30, 30);
+
+
+	makeLevel();
+//	string c = to_string(exitKeys[0]->y);
+//	drawText(font, c, 0.2f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.2f);
+//	string d = to_string(exitKeys[0]->x);
+//	drawText(font, d, 0.2f, 0.1f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.5f);
 
 	glPopMatrix();
 }
@@ -379,9 +559,12 @@ void App::makeLevel(){
 	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDrawArrays(GL_QUADS, 0, vertexData.size()/2);
-	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
 }
+
 
 bool App::updateAndRender(){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
@@ -404,7 +587,7 @@ bool App::updateAndRender(){
 	return done;
 }
 
-void App::updateGameLevel(){
+void App::updateGameLevelOne(){
 	if(keys[SDL_SCANCODE_RIGHT]){
 		playerOne->xVelo += 2.0f * FIXED_TIMESTEP;
 		playerOne->xAcc = 0.5f;
@@ -422,6 +605,9 @@ void App::updateGameLevel(){
 	}
 	if(playerOne->x < 0.0f){
 		playerOne->x = 0.0f;
+	}
+	if(playerOne->x > 7.30){
+		playerOne->x = 7.30;
 	}
 
 	//player two keys
@@ -472,32 +658,203 @@ void App::updateGameLevel(){
 	playerTwo->yVelo += gravity * FIXED_TIMESTEP;
 
 	collideWithMapX(playerTwo);
-/*
-	//enemy time steps
-	for(size_t i=0; i<enemies.size(); i++){
-		enemies[i]->xVelo += enemies[i]->xAcc * FIXED_TIMESTEP;
-		enemies[i]->x += enemies[i]->xVelo * FIXED_TIMESTEP;
-	
-		enemies[i]->xVelo = lerp(enemies[i]->xVelo, 0.0f, FIXED_TIMESTEP * enemies[i]->xFric);
-		enemies[i]->xVelo += enemies[i]->xAcc * FIXED_TIMESTEP;
-		enemies[i]->x += enemies[i]->xVelo * FIXED_TIMESTEP;
-	}
-	*/
 
+	for(size_t i=0; i<spikes.size(); i++){
+		if(playerOne->collideX(spikes[i]) || playerOne->collideY(spikes[i]) || playerTwo->collideX(spikes[i]) || playerTwo->collideY(spikes[i])){
+			state = STATE_GAME_OVER;
+		}
+	}
+
+	for(size_t i=0; i<blueGems.size(); i++){
+		if(playerOne->collideX(blueGems[i]) || playerOne->collideY(blueGems[i])){
+			blueGems[i]->visible = false;
+		//	delete blueGems[i];
+		}
+	}
+	for(size_t i=0; i<greenGems.size(); i++){
+		if(playerTwo->collideX(greenGems[i]) || playerTwo->collideY(greenGems[i])){
+			greenGems[i]->visible = false;
+		//	delete greenGems[i];
+		}
+	}
+	for(size_t i=0; i<exitKeys.size(); i++){
+		if(playerOne->collideX(exitKeys[i]) || playerOne->collideY(exitKeys[i]) || playerTwo->collideX(exitKeys[i]) || playerTwo->collideY(exitKeys[i])){
+			exitKeys[i]->visible = false;
+		//	delete exitKeys[i];
+		}
+	}
+	if(blueGems.size() == 0 && greenGems.size() == 0 && exitKeys.size() == 0){
+		if(playerOne->collideX(exitBot) || playerOne->collideY(exitBot) || playerTwo->collideX(exitBot) || playerTwo->collideY(exitBot)){
+			state = STATE_GAME_OVER;
+		}
+	}
+}
+
+void App::updateGameLevelTwo(){
+	if(keys[SDL_SCANCODE_RIGHT]){
+		playerOne->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = 0.5f;
+	}
+	if(keys[SDL_SCANCODE_LEFT]){
+		playerOne->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = -0.5f;
+	}
+	else{
+		playerOne->xAcc = 0.0f;
+	}
+	if(keys[SDL_SCANCODE_UP] && playerOne->collidedBot){
+		playerOne->yVelo = 2.0f;
+		playerOne->collidedBot = false;
+	}
+	if(playerOne->x < 0.0f){
+		playerOne->x = 0.0f;
+	}
+	if(playerOne->x > 7.30){
+		playerOne->x = 7.30;
+	}
+
+	//player two keys
+	if(keys[SDL_SCANCODE_D]){
+		playerTwo->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = 0.5f;
+	}
+	if(keys[SDL_SCANCODE_A]){
+		playerTwo->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = -0.5f;
+	}
+	else{
+		playerTwo->xAcc = 0.0f;
+	}
+	if(keys[SDL_SCANCODE_W] && playerTwo->collidedBot){
+		playerTwo->yVelo = 2.0f;
+		playerTwo->collidedBot = false;
+	}
+	if(playerTwo->x < 0.0f){
+		playerTwo->x = 0.0f;
+	}
+
+
+	//playerOne time steps
+	playerOne->yVelo = lerp(playerOne->yVelo, 0.0f, FIXED_TIMESTEP * playerOne->yFric);
+	playerOne->yVelo += playerOne->yAcc * FIXED_TIMESTEP;
+	playerOne->y += playerOne->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerOne);
+	
+	playerOne->xVelo = lerp(playerOne->xVelo, 0.0f, FIXED_TIMESTEP * playerOne->xFric);
+	playerOne->xVelo += playerOne->xAcc * FIXED_TIMESTEP;
+	playerOne->x += playerOne->xVelo * FIXED_TIMESTEP;
+//	playerOne->yVelo += gravity * FIXED_TIMESTEP;
+
+	collideWithMapX(playerOne);
+
+	//playerTwo time steps
+	playerTwo->yVelo = lerp(playerTwo->yVelo, 0.0f, FIXED_TIMESTEP * playerTwo->yFric);
+	playerTwo->yVelo += playerTwo->yAcc * FIXED_TIMESTEP;
+	playerTwo->y += playerTwo->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerTwo);
+	
+	playerTwo->xVelo = lerp(playerTwo->xVelo, 0.0f, FIXED_TIMESTEP * playerTwo->xFric);
+	playerTwo->xVelo += playerTwo->xAcc * FIXED_TIMESTEP;
+	playerTwo->x += playerTwo->xVelo * FIXED_TIMESTEP;
+//	playerTwo->yVelo += gravity * FIXED_TIMESTEP;
+
+	collideWithMapX(playerTwo);
+	
+}
+
+void App::updateGameLevelThree(){
+	if(keys[SDL_SCANCODE_RIGHT]){
+		playerOne->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = 0.5f;
+	}
+	if(keys[SDL_SCANCODE_LEFT]){
+		playerOne->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerOne->xAcc = -0.5f;
+	}
+	else{
+		playerOne->xAcc = 0.0f;
+	}
+	if(keys[SDL_SCANCODE_UP] && playerOne->collidedBot){
+		playerOne->yVelo = 2.0f;
+		playerOne->collidedBot = false;
+	}
+	if(playerOne->x < 0.0f){
+		playerOne->x = 0.0f;
+	}
+	if(playerOne->x > 7.30){
+		playerOne->x = 7.30;
+	}
+
+	//player two keys
+	if(keys[SDL_SCANCODE_D]){
+		playerTwo->xVelo += 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = 0.5f;
+	}
+	if(keys[SDL_SCANCODE_A]){
+		playerTwo->xVelo -= 2.0f * FIXED_TIMESTEP;
+		playerTwo->xAcc = -0.5f;
+	}
+	else{
+		playerTwo->xAcc = 0.0f;
+	}
+	if(keys[SDL_SCANCODE_W] && playerTwo->collidedBot){
+		playerTwo->yVelo = 2.0f;
+		playerTwo->collidedBot = false;
+	}
+	if(playerTwo->x < 0.0f){
+		playerTwo->x = 0.0f;
+	}
+
+
+	//playerOne time steps
+	playerOne->yVelo = lerp(playerOne->yVelo, 0.0f, FIXED_TIMESTEP * playerOne->yFric);
+	playerOne->yVelo += playerOne->yAcc * FIXED_TIMESTEP;
+	playerOne->y += playerOne->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerOne);
+	
+	playerOne->xVelo = lerp(playerOne->xVelo, 0.0f, FIXED_TIMESTEP * playerOne->xFric);
+	playerOne->xVelo += playerOne->xAcc * FIXED_TIMESTEP;
+	playerOne->x += playerOne->xVelo * FIXED_TIMESTEP;
+//	playerOne->yVelo += gravity * FIXED_TIMESTEP;
+
+	collideWithMapX(playerOne);
+
+	//playerTwo time steps
+	playerTwo->yVelo = lerp(playerTwo->yVelo, 0.0f, FIXED_TIMESTEP * playerTwo->yFric);
+	playerTwo->yVelo += playerTwo->yAcc * FIXED_TIMESTEP;
+	playerTwo->y += playerTwo->yVelo * FIXED_TIMESTEP;
+
+	collideWithMapY(playerTwo);
+	
+	playerTwo->xVelo = lerp(playerTwo->xVelo, 0.0f, FIXED_TIMESTEP * playerTwo->xFric);
+	playerTwo->xVelo += playerTwo->xAcc * FIXED_TIMESTEP;
+	playerTwo->x += playerTwo->xVelo * FIXED_TIMESTEP;
+//	playerTwo->yVelo += gravity * FIXED_TIMESTEP;
+
+	collideWithMapX(playerTwo);
 }
 
 void App::update(){
 	SDL_Event event;
 
-	if(state == STATE_GAME_LEVEL){
-		updateGameLevel();
+	if(state == STATE_LEVEL_ONE){
+		updateGameLevelOne();
+	}
+	if(state == STATE_LEVEL_TWO){
+		updateGameLevelTwo();
+	}
+	if(state == STATE_LEVEL_THREE){
+		updateGameLevelThree();
 	}
 
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 			done = true;
 		}
-		if(state == STATE_GAME_LEVEL){
+		if(state == STATE_LEVEL_ONE || state == STATE_LEVEL_TWO || state == STATE_LEVEL_THREE){
 			if(event.key.keysym.scancode == SDL_SCANCODE_R){
 				state = STATE_GAME_OVER;
 			}
@@ -506,9 +863,25 @@ void App::update(){
 			}
 		}
 		if(state == STATE_MAIN_MENU){
-			if(event.key.keysym.scancode == SDL_SCANCODE_SPACE){
-				reset();
-				state = STATE_GAME_LEVEL;
+			if(event.key.keysym.scancode == SDL_SCANCODE_I){
+				state = STATE_INSTR_MENU;
+			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
+				SDL_Quit();
+			}
+		}
+		if(state == STATE_INSTR_MENU){
+			if(event.key.keysym.scancode == SDL_SCANCODE_1){
+				resetLevelOne();
+				state = STATE_LEVEL_ONE;
+			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_2){
+				resetLevelTwo();
+				state = STATE_LEVEL_TWO;
+			}
+			if(event.key.keysym.scancode == SDL_SCANCODE_3){
+				resetLevelThree();
+				state = STATE_LEVEL_THREE;
 			}
 			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
 				SDL_Quit();
@@ -528,22 +901,37 @@ void App::update(){
 bool App::isSolid(int tile){
 	switch (tile){
 		//floors
-	case 1:
-		return true;
-		break;
 	case 2:
 		return true;
 		break;
 	case 3:
 		return true;
 		break;
-	case 4:
+	case 9:
 		return true;
 		break;
-	case 34:
+	case 33:
 		return true;
 		break;
-	case 35:
+	case 62:
+		return true;
+		break;
+	case 69:
+		return true;
+		break;
+	case 122:
+		return true;
+		break;
+	case 129:
+		return true;
+		break;
+	case 153:
+		return true;
+		break;
+	case 302:
+		return true;
+		break;
+	case 309:
 		return true;
 		break;
 	default:

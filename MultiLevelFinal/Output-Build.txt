@@ -1,0 +1,4 @@
+﻿1>------ Build started: Project: MultiLevel, Configuration: Debug Win32 ------
+1>  App.cpp
+1>  MultiLevel.vcxproj -> C:\Users\Nick\Documents\Visual Studio 2012\Projects\MultiLevelFinal\Debug\MultiLevel.exe
+========== Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========

@@ -91,7 +91,8 @@
     <ClCompile Include="MultiLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="level.txt" />
+    <Text Include="levelOne.txt" />
+    <Text Include="levelTwo.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
