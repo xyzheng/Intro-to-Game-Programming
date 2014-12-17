@@ -1,16 +1,18 @@
-//Nick Zheng
-//Assignment 5 - Side Scroller
+//Nick Zheng, Anthony Wong
+//Final Project
 
 #pragma once
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <vector>
 #include <fstream>
 #include <string>
 #include <iostream>
 #include <sstream>
 #include "Entity.h"
+#include "ParticleEmitter.h"
 #include <algorithm>
 #include <cstdlib>
 
@@ -28,12 +30,12 @@ public:
 	void resetLevelTwo();
 	void resetLevelThree();
 
-	void render();
+	void render(float elapsed);
 	void renderMainMenu();
 	void renderInstrMenu();
-	void renderLevelOne();
-	void renderLevelTwo();
-//	void renderLevelThree();
+	void renderLevelOne(float elapsed);
+	void renderLevelTwo(float elapsed);
+	void renderLevelThree(float elapsed);
 	void renderGameOver();
 
 	void updateGameLevelOne();
@@ -72,8 +74,17 @@ private:
 	bool done;
 	ifstream inFile;
 
+	Mix_Chunk* gem;
+    Mix_Chunk* jump;
+    Mix_Chunk* next;
+    Mix_Chunk* spike;
+    Mix_Chunk* lavas;
+    Mix_Music* menu;
+
+	ParticleEmitter* emitterOne;
+	ParticleEmitter* emitterTwo;
+
 	int state;
-	int score;
 	float gravity;
 
 	GLuint font;
@@ -81,18 +92,27 @@ private:
 	GLuint characters;
 
 	unsigned char** levelData;
+
 	int mapWidth;
 	int mapHeight;
-	int marginX;
-	int marginY;
+	
+	Entity* playerOne;
+	Entity* playerTwo;
 
+	//stage 1
 	vector<Entity*> spikes;
 	vector<Entity*> blueGems;
 	vector<Entity*> greenGems;
 	vector<Entity*> exitKeys;
-	Entity* playerOne;
-	Entity* playerTwo;
+
 	Entity* exitTop;
 	Entity* exitBot;
+
+	//stage 2
+	vector<Entity*> lava;
+
+	//stage 3 stuff
+	vector<Entity*> exitOne;
+	vector<Entity*> exitTwo;
 
 };

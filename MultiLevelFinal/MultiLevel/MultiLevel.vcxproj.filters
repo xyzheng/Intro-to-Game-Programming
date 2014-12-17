@@ -21,6 +21,15 @@
     <ClInclude Include="Entity.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -32,12 +41,21 @@
     <ClCompile Include="MultiLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="levelOne.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="levelTwo.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="levelThree.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

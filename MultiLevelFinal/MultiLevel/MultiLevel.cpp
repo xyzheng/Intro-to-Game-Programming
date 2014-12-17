@@ -1,5 +1,5 @@
-//Nick Zheng
-//Assignment 5 - Side Scroller
+//Nick Zheng, Anthony Wong
+//Final Project
 
 #include "App.h"
 
